@@ -1,0 +1,5 @@
+Пример файла настроек (config.txt)
+
+app.name=MyApplication
+app.version=1.0.1
+app.environment=development
