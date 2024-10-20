@@ -41,4 +41,9 @@ public class ChatMediator implements IMediator {
             u.receive(message);
         }
     }
+    @Override
+public void sendPrivateMessage(String message, IUser fromUser, IUser toUser) {
+    toUser.receive("Private message from " + fromUser.getName() + ": " + message);
+}
+
 }
