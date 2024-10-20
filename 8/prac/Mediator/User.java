@@ -22,4 +22,9 @@ public class User implements IUser {
     public String getName() {
         return name;
     }
+    public void sendToOtherChannel(String message, String fromChannel, String toChannel) {
+    System.out.println(this.name + " отправляет сообщение с " + fromChannel + " к " + toChannel);
+    mediator.sendMessage(message, this, toChannel);
+}
+
 }
