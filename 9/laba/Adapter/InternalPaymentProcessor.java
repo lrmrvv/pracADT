@@ -1,11 +1,11 @@
 class InternalPaymentProcessor implements IPaymentProcessor {
     @Override
     public void processPayment(double amount) {
-        System.out.println("Processing payment of " + amount + " via internal system.");
+        System.out.println("Обработка платежей по " + amount + " через внутреннюю систему.");
     }
 
     @Override
     public void refundPayment(double amount) {
-        System.out.println("Refunding payment of " + amount + " via internal system.");
+        System.out.println("Возврат оплаты за " + amount + " через внутреннюю систему.");
     }
 }
