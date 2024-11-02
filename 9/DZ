@@ -1,1 +1,250 @@
+//декоратор
+public interface Beverage {
+    String getDescription();
+    double cost();
+}
+
+public class Espresso implements Beverage {
+    @Override 
+    public String getDescription() {
+        return "Espresso";
+    }
+
+    @Override
+    public double cost() {
+        return 3.0;
+    }
+}
+
+public class Tea implements Beverage {
+    @Override
+    public String getDescription() {
+        return "Tea";
+    }
+
+    @Override
+    public double cost() {
+        return 2.5;
+    }
+}
+
+public class Latte implements Beverage {
+    @Override
+    public String getDescription() {
+        return "Latte";
+    }
+
+    @Override
+    public double cost() {
+        return 4.0;
+    }
+}
+
+public class Mocha implements Beverage {
+    @Override
+    public String getDescription() {
+        return "Mocha";
+    }
+
+    @Override
+    public double cost() {
+        return 4.5;
+    }
+}
+
+public abstract class BeverageDecorator implements Beverage {
+    protected Beverage beverage;
+
+    public BeverageDecorator(Beverage beverage) {
+        this.beverage = beverage;
+    }
+
+    @Override
+    public String getDescription() {
+        return beverage.getDescription();
+    }
+
+    @Override
+    public double cost() {
+        return beverage.cost();
+    }
+}
+
+
+public class Milk extends BeverageDecorator {
+    public Milk(Beverage beverage) {
+        super(beverage);
+    }
+
+    @Override
+    public String getDescription() {
+        return beverage.getDescription() + ", Milk";
+    }
+
+    @Override
+    public double cost() {
+        return beverage.cost() + 0.5;
+    }
+}
+
+
+public class Sugar extends BeverageDecorator {
+    public Sugar(Beverage beverage) {
+        super(beverage);
+    }
+
+    @Override
+    public String getDescription() {
+        return beverage.getDescription() + ", Sugar";
+    }
+
+    @Override
+    public double cost() {
+        return beverage.cost() + 0.2;
+    }
+}
+
+public class WhippedCream extends BeverageDecorator {
+    public WhippedCream(Beverage beverage) {
+        super(beverage);
+    }
+
+    @Override
+    public String getDescription() {
+        return beverage.getDescription() + ", Whipped Cream";
+    }
+
+    @Override
+    public double cost() {
+        return beverage.cost() + 0.7;
+    }
+}
+
+public class Caramel extends BeverageDecorator {
+    public Caramel(Beverage beverage) {
+        super(beverage);
+    }
+
+    @Override
+    public String getDescription() {
+        return beverage.getDescription() + ", Caramel";
+    }
+
+    @Override
+    public double cost() {
+        return beverage.cost() + 0.6;
+    }
+}
+
+public class Chocolate extends BeverageDecorator {
+    public Chocolate(Beverage beverage) {
+        super(beverage);
+    }
+
+    @Override
+    public String getDescription() {
+        return beverage.getDescription() + ", Chocolate";
+    }
+
+    @Override
+    public double cost() {
+        return beverage.cost() + 0.8;
+    }
+}
+
+public class CafeOrder {
+    public static void main(String[] args) {
+        Beverage latte = new Latte();
+        latte = new Milk(latte);
+        latte = new Sugar(latte);
+        latte = new WhippedCream(latte);
+
+        System.out.println("Order: " + latte.getDescription());
+        System.out.println("Total cost: $" + latte.cost());
+
+        Beverage espresso = new Espresso();
+        espresso = new Caramel(espresso);
+        espresso = new Chocolate(espresso);
+
+        System.out.println("\nOrder: " + espresso.getDescription());
+        System.out.println("Total cost: $" + espresso.cost());
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Адаптер
+public interface IPaymentProcessor {
+    void processPayment(double amount);
+}
+
+public class PayPalPaymentProcessor implements IPaymentProcessor {
+    @Override
+    public void processPayment(double amount) {
+        System.out.println("Обработка транзакции по $" + amount + " через PayPal.");
+    }
+}
+
+public class StripePaymentService {
+    public void makeTransaction(double totalAmount) {
+        System.out.println("Обработка транзакции по $" + totalAmount + " через Stripe.");
+    }
+}
+
+public class StripePaymentAdapter implements IPaymentProcessor {
+    private StripePaymentService stripeService;
+
+    public StripePaymentAdapter(StripePaymentService stripeService) {
+        this.stripeService = stripeService;
+    }
+
+    @Override
+    public void processPayment(double amount) {
+        stripeService.makeTransaction(amount);
+    }
+}
+
+public class SquarePaymentService {
+    public void executePayment(double paymentAmount) {
+        System.out.println("Осуществление платежа по $" + paymentAmount + " через Square.");
+    }
+}
+
+public class SquarePaymentAdapter implements IPaymentProcessor {
+    private SquarePaymentService squareService;
+
+    public SquarePaymentAdapter(SquarePaymentService squareService) {
+        this.squareService = squareService;
+    }
+
+    @Override
+    public void processPayment(double amount) {
+        squareService.executePayment(amount);
+    }
+}
+
+public class PaymentClient {
+    public static void main(String[] args) {
+        IPaymentProcessor paypalProcessor = new PayPalPaymentProcessor();
+        paypalProcessor.processPayment(50.0);
+
+        StripePaymentService stripeService = new StripePaymentService();
+        IPaymentProcessor stripeAdapter = new StripePaymentAdapter(stripeService);
+        stripeAdapter.processPayment(75.0);
+
+        SquarePaymentService squareService = new SquarePaymentService();
+        IPaymentProcessor squareAdapter = new SquarePaymentAdapter(squareService);
+        squareAdapter.processPayment(100.0);
+    }
+}
 
