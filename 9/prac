@@ -1,1 +1,302 @@
+// Декоратор
 
+public interface IReport {
+    String generate();
+}
+
+
+public class SalesReport implements IReport {
+    @Override
+    public String generate() {
+        return "Отчет о продажах: [даннUser Report: [data about users]ые о продажах]";
+    }
+}
+
+public class UserReport implements IReport {
+    @Override
+    public String generate() {
+        return "Отчет пользователя: [данные о пользователях]";
+    }
+}
+
+public abstract class ReportDecorator implements IReport {
+    protected IReport report;
+
+    public ReportDecorator(IReport report) {
+        this.report = report;
+    }
+
+    @Override
+    public String generate() {
+        return report.generate();
+    }
+}
+
+
+import java.time.LocalDate;
+
+public class DateFilterDecorator extends ReportDecorator {
+    private LocalDate startDate;
+    private LocalDate endDate;
+
+    public DateFilterDecorator(IReport report, LocalDate startDate, LocalDate endDate) {
+        super(report);
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
+    @Override
+    public String generate() {
+        return report.generate() + "Отфильтровано по датам из " + startDate + " к " + endDate;
+    }
+}
+
+public class SortingDecorator extends ReportDecorator {
+    private String sortBy;
+
+    public SortingDecorator(IReport report, String sortBy) {
+        super(report);
+        this.sortBy = sortBy;
+    }
+
+    @Override
+    public String generate() {
+        return report.generate() + "Отсортированный по: " + sortBy;
+    }
+}
+
+public class CsvExportDecorator extends ReportDecorator {
+
+    public CsvExportDecorator(IReport report) {
+        super(report);
+    }
+
+    @Override
+    public String generate() {
+        return report.generate() + "Экспортирован в формат CSV";
+    }
+}
+
+public class PdfExportDecorator extends ReportDecorator {
+
+    public PdfExportDecorator(IReport report) {
+        super(report);
+    }
+
+    @Override
+    public String generate() {
+        return report.generate() + "Экспортирован в формат PDF";
+    }
+}
+
+public class SalesAmountFilterDecorator extends ReportDecorator {
+    private double minAmount;
+
+    public SalesAmountFilterDecorator(IReport report, double minAmount) {
+        super(report);
+        this.minAmount = minAmount;
+    }
+
+    @Override
+    public String generate() {
+        return report.generate() + "Отфильтровано по объему продаж, превышающему: " + minAmount;
+    }
+}
+
+import java.time.LocalDate;
+
+public class Main {
+    public static void main(String[] args) {
+        IReport report = new SalesReport();
+        
+        report = new DateFilterDecorator(report, LocalDate.of(2023, 1, 1), LocalDate.of(2023, 12, 31));
+        report = new SortingDecorator(report, "date");
+        report = new SalesAmountFilterDecorator(report, 5000.0);
+        report = new CsvExportDecorator(report);
+
+        System.out.println(report.generate());
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+//Адаптер
+public interface IInternalDeliveryService {
+    void deliverOrder(String orderId);
+    String getDeliveryStatus(String orderId);
+}
+
+public class InternalDeliveryService implements IInternalDeliveryService {
+    @Override
+    public void deliverOrder(String orderId) {
+        System.out.println("Внутренняя доставка, инициированная по заказу: " + orderId);
+    }
+
+    @Override
+    public String getDeliveryStatus(String orderId) {
+        return "Статус доставки заказа " + orderId + ": в пути";
+    }
+}
+
+public class ExternalLogisticsServiceA {
+    public void shipItem(int itemId) {
+        System.out.println("Отправляемый товар с идентификатором: " + itemId + " использование внешнего логистического сервиса A.");
+    }
+
+    public String trackShipment(int shipmentId) {
+        return "Статус отслеживания идентификатора отправления " + shipmentId + " во внешних логистических службах A: В пути";
+    }
+}
+
+public class ExternalLogisticsServiceB {
+    public void sendPackage(String packageInfo) {
+        System.out.println("Отправка посылки с информацией: " + packageInfo + " использование внешнего логистического сервиса B.");
+    }
+
+    public String checkPackageStatus(String trackingCode) {
+        return "Статус посылки по коду отслеживания " + trackingCode + " во внешнем логистическом сервисе B: Доставлено";
+    }
+}
+
+public class LogisticsAdapterA implements IInternalDeliveryService {
+    private ExternalLogisticsServiceA externalService;
+
+    public LogisticsAdapterA(ExternalLogisticsServiceA externalService) {
+        this.externalService = externalService;
+    }
+
+    @Override
+    public void deliverOrder(String orderId) {
+        int itemId = Integer.parseInt(orderId); 
+        externalService.shipItem(itemId);
+    }
+
+    @Override
+    public String getDeliveryStatus(String orderId) {
+        int shipmentId = Integer.parseInt(orderId); 
+        return externalService.trackShipment(shipmentId);
+    }
+}
+
+public class LogisticsAdapterB implements IInternalDeliveryService {
+    private ExternalLogisticsServiceB externalService;
+
+    public LogisticsAdapterB(ExternalLogisticsServiceB externalService) {
+        this.externalService = externalService;
+    }
+
+    @Override
+    public void deliverOrder(String orderId) {
+        externalService.sendPackage(orderId); 
+    }
+
+    @Override
+    public String getDeliveryStatus(String orderId) {
+        return externalService.checkPackageStatus(orderId);
+    }
+}
+
+public class ExternalLogisticsServiceC {
+    public void initiateDelivery(String orderReference) {
+        System.out.println("Initiating delivery for order reference: " + orderReference + " using ExternalLogisticsServiceC.");
+    }
+
+    public String retrieveStatus(String orderReference) {
+        return "Status for order reference " + orderReference + " in ExternalLogisticsServiceC: Pending";
+    }
+}
+
+public class LogisticsAdapterC implements IInternalDeliveryService {
+    private ExternalLogisticsServiceC externalService;
+
+    public LogisticsAdapterC(ExternalLogisticsServiceC externalService) {
+        this.externalService = externalService;
+    }
+
+    @Override
+    public void deliverOrder(String orderId) {
+        externalService.initiateDelivery(orderId);
+    }
+
+    @Override
+    public String getDeliveryStatus(String orderId) {
+        return externalService.retrieveStatus(orderId);
+    }
+}
+
+public class DeliveryServiceFactory {
+    public static IInternalDeliveryService getDeliveryService(String serviceType) {
+        switch (serviceType) {
+            case "Внутренний":
+                return new InternalDeliveryService();
+            case "ВнешнийA":
+                return new LogisticsAdapterA(new ExternalLogisticsServiceA());
+            case "ВнешнийB":
+                return new LogisticsAdapterB(new ExternalLogisticsServiceB());
+            case "ВнешнийC":
+                return new LogisticsAdapterC(new ExternalLogisticsServiceC());
+            default:
+                throw new IllegalArgumentException("Неверный тип службы доставки");
+        }
+    }
+}
+
+public class LoggingLogisticsAdapterA extends LogisticsAdapterA {
+    public LoggingLogisticsAdapterA(ExternalLogisticsServiceA externalService) {
+        super(externalService);
+    }
+
+    @Override
+    public void deliverOrder(String orderId) {
+        try {
+            super.deliverOrder(orderId);
+        } catch (Exception e) {
+            System.out.println("Ошибка во время доставки: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public String getDeliveryStatus(String orderId) {
+        try {
+            return super.getDeliveryStatus(orderId);
+        } catch (Exception e) {
+            System.out.println("Ошибка при получении статуса доставки: " + e.getMessage());
+            return "Ошибка при получении статуса";
+        }
+    }
+}
+
+public interface IInternalDeliveryService {
+    void deliverOrder(String orderId);
+    String getDeliveryStatus(String orderId);
+    double calculateDeliveryCost(String orderId); 
+}
+
+public class InternalDeliveryService implements IInternalDeliveryService {
+    @Override
+    public void deliverOrder(String orderId) { }
+    @Override
+    public String getDeliveryStatus(String orderId) { }
+    @Override
+    public double calculateDeliveryCost(String orderId) {
+        return 10.0;
+    }
+}
+
+public class Client {
+    public static void main(String[] args) {
+        IInternalDeliveryService deliveryService = DeliveryServiceFactory.getDeliveryService("ExternalA");
+        
+        deliveryService.deliverOrder("12345");
+        System.out.println(deliveryService.getDeliveryStatus("12345"));
+        System.out.println("Стоимость доставки: $" + deliveryService.calculateDeliveryCost("12345"));
+    }
+}
