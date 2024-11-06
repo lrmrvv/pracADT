@@ -40,4 +40,32 @@ class Department extends OrganizationComponent {
         }
         return totalEmployees;
     }
+
+    public OrganizationComponent findEmployeeByName(String name) {
+    for (OrganizationComponent component : components) {
+        if (component instanceof Employee && component.getName().equals(name)) {
+            return component;
+        } else if (component instanceof Department) {
+            OrganizationComponent found = ((Department) component).findEmployeeByName(name);
+            if (found != null) {
+                return found;
+            }
+        }
+    }
+    return null;
+}
+
+
+    public List<Employee> getAllEmployees() {
+    List<Employee> employees = new ArrayList<>();
+    for (OrganizationComponent component : components) {
+        if (component instanceof Employee) {
+            employees.add((Employee) component);
+        } else if (component instanceof Department) {
+            employees.addAll(((Department) component).getAllEmployees());
+        }
+    }
+    return employees;
+}
+
 }
